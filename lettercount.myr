@@ -1,0 +1,45 @@
+use std
+use termdraw
+
+const all_letters = "abcdefghijklmnopqrstuvwxyz "
+const print_all = {term, letters : std.htab(char, int)#
+	var val
+
+	for i : std.bychar(all_letters)
+		val = std.htgetv(letters, i, 0)
+		if val > 0
+			termdraw.put(term, "{}: {}\r\n", i, val)
+		;;
+	;;
+}
+
+const main = {
+	var cur : int
+	var letters : std.htab(char, int)#
+	letters = std.mkht()
+
+	var term = termdraw.mk(std.In)
+	termdraw.raw(term)
+	termdraw.cls(term)
+
+	var ev
+	while true
+		ev = termdraw.event(term)
+		match ev
+		| `termdraw.Kc i:
+			cur = std.htgetv(letters, (i : char), 0)
+			std.htput(letters, (i : char), cur + 1)
+		| `termdraw.Ctrl 'c':
+			break
+		| _:
+		;;
+
+		termdraw.cls(term)
+		termdraw.move(term, 0, 0)
+		print_all(term, letters)
+		termdraw.flush(term)
+	;;
+			
+	print_all(term, letters)
+	termdraw.free(term)
+}
